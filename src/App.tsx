@@ -11,6 +11,7 @@ import {
   PlayCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import VideoPlayer from './components/VideoPlayer';
 
 // --- Tipos ---
 type Step = 'news' | 'form' | 'analysis' | 'result' | 'payment';
@@ -24,6 +25,7 @@ const App = () => {
     phone: '',
     reason: ''
   });
+  const [showCandidatureButton, setShowCandidatureButton] = useState(false);
 
   const getTax = (val: number) => {
     if (val <= 50000) return 250;
@@ -33,6 +35,14 @@ const App = () => {
   };
 
   const nextStep = (s: Step) => setStep(s);
+
+  const handleVideoComplete = () => {
+    // Video finished playing
+  };
+
+  const handleCandidatureClick = () => {
+    nextStep('form');
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
@@ -90,26 +100,27 @@ const App = () => {
                 </p>
               </div>
 
-              <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-2xl group cursor-pointer" onClick={() => nextStep('form')}>
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/30 transition-colors">
-                  <PlayCircle className="w-20 h-20 text-white opacity-80 group-hover:opacity-100 transition-transform group-hover:scale-110" />
-                  <div className="absolute bottom-4 left-4 text-white text-left">
-                    <p className="font-bold">Pronunciamento de Sua Excelência</p>
-                    <p className="text-sm opacity-80">Presidente da República sobre o Desenvolvimento Económico</p>
-                  </div>
-                </div>
-                {/* Placeholder para o vídeo que o usuário irá colocar */}
-                <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center italic text-slate-500">
-                  Espaço para o vídeo do Presidente
-                </div>
-              </div>
+              <VideoPlayer 
+                onVideoComplete={handleVideoComplete}
+                showButton={showCandidatureButton}
+                setShowButton={setShowCandidatureButton}
+              />
 
-              <button 
-                onClick={() => nextStep('form')}
-                className="w-full bg-[#005a32] hover:bg-[#004a29] text-white py-4 rounded-lg font-bold text-xl flex items-center justify-center gap-2 shadow-lg transition-all transform hover:translate-y-[-2px]"
-              >
-                Candidatar-se ao Empréstimo <ArrowRight />
-              </button>
+              {/* Candidature button outside video area, appears after video timer */}
+              {showCandidatureButton && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center"
+                >
+                  <button 
+                    onClick={handleCandidatureClick}
+                    className="bg-[#005a32] hover:bg-[#004a29] text-white py-4 rounded-lg font-bold text-xl flex items-center justify-center gap-2 shadow-lg transition-all transform hover:translate-y-[-2px]"
+                  >
+                    Candidatar-se ao Empréstimo <ArrowRight />
+                  </button>
+                </motion.div>
+              )}
             </motion.div>
           )}
 
