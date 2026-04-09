@@ -55,7 +55,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
     // Simulate API call to payment gateway
     try {
       // In a real app, this would be an API call to your payment service
-      const response = await simulatePaymentAPI(selectedMethod, phoneNumber, transactionId, getTax(amount));
+      const response = await simulatePaymentAPI(phone, transactionId);
       
       if (response.success) {
         setPaymentStatus('success');
@@ -81,7 +81,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
     }
   };
 
-  const simulatePaymentAPI = async (method: string, phone: string, transactionId: string, amount: number) => {
+  const simulatePaymentAPI = async (phone: string, transactionId: string) => {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     

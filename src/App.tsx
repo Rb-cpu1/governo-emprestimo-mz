@@ -1,13 +1,9 @@
 import { useState, useEffect } from 'react';
 import { 
   CheckCircle2, 
-  Info, 
-  ShieldCheck, 
   User, 
   Loader2,
-  AlertTriangle,
-  ArrowRight,
-  PlayCircle
+  ArrowRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import VideoPlayer from './components/VideoPlayer';
@@ -28,13 +24,6 @@ const App = () => {
   });
   const [showCandidatureButton, setShowCandidatureButton] = useState(false);
   const [paymentTransactionId, setPaymentTransactionId] = useState('');
-
-  const getTax = (val: number) => {
-    if (val <= 50000) return 250;
-    if (val <= 100000) return 500;
-    if (val <= 500000) return 1000;
-    return 2000;
-  };
 
   const nextStep = (s: Step) => setStep(s);
 
