@@ -12,9 +12,10 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import VideoPlayer from './components/VideoPlayer';
 import PaymentMethod from './components/PaymentMethod';
+import PaymentSuccess from './components/PaymentSuccess';
 
 // --- Tipos ---
-type Step = 'news' | 'form' | 'analysis' | 'result' | 'payment';
+type Step = 'news' | 'form' | 'analysis' | 'result' | 'payment' | 'success';
 
 const App = () => {
   const [step, setStep] = useState<Step>('news');
@@ -26,6 +27,7 @@ const App = () => {
     reason: ''
   });
   const [showCandidatureButton, setShowCandidatureButton] = useState(false);
+  const [paymentTransactionId, setPaymentTransactionId] = useState('');
 
   const getTax = (val: number) => {
     if (val <= 50000) return 250;
@@ -45,9 +47,13 @@ const App = () => {
   };
 
   const handlePaymentComplete = (transactionId: string) => {
-    // Payment completed successfully
-    console.log('Payment completed with transaction ID:', transactionId);
-    // Here you would typically redirect to a success page or show a completion message
+    setPaymentTransactionId(transactionId);
+    nextStep('success');
+  };
+
+  const handleSuccessNext = () => {
+    // Navigate to dashboard or next step
+    console.log('Navigating to dashboard...');
   };
 
   return (
@@ -254,6 +260,14 @@ const App = () => {
             <PaymentMethod 
               amount={amount}
               onPaymentComplete={handlePaymentComplete}
+            />
+          )}
+
+          {step === 'success' && (
+            <PaymentSuccess 
+              amount={amount}
+              transactionId={paymentTransactionId}
+              onNextStep={handleSuccessNext}
             />
           )}
         </AnimatePresence>

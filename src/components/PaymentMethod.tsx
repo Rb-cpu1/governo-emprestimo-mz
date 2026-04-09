@@ -1,11 +1,20 @@
 "use client";
 
 import React, { useState } from 'react';
-import { CreditCard, ShieldCheck, Smartphone, AlertTriangle } from 'lucide-react';
+import { CreditCard, ShieldCheck, Smartphone, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 
 interface PaymentMethodProps {
   amount: number;
   onPaymentComplete: (transactionId: string) => void;
+}
+
+interface PaymentHistory {
+  id: string;
+  method: 'mpesa' | 'emola';
+  amount: number;
+  status: 'pending' | 'completed' | 'failed';
+  date: string;
+  transactionId?: string;
 }
 
 const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete }) => {
@@ -14,6 +23,9 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
   const [transactionId, setTransactionId] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
+  const [timer, setTimer] = useState(900); // 15 minutes in seconds
+  const [showHistory, setShowHistory] = useState(false);
 
   const getTax = (val: number) => {
     if (val <= 50000) return 250;
@@ -28,36 +40,108 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
     setIsProcessing(true);
     setPaymentStatus('processing');
 
-    // Simulate payment processing
-    setTimeout(() => {
-      // Simulate successful payment (in real app, this would be an API call)
-      if (transactionId.length >= 6) {
+    // Create payment record
+    const paymentRecord: PaymentHistory = {
+      id: Date.now().toString(),
+      method: selectedMethod,
+      amount: getTax(amount),
+      status: 'pending',
+      date: new Date().toISOString(),
+      transactionId: transactionId
+    };
+
+    setPaymentHistory(prev => [paymentRecord, ...prev]);
+
+    // Simulate API call to payment gateway
+    try {
+      // In a real app, this would be an API call to your payment service
+      const response = await simulatePaymentAPI(selectedMethod, phoneNumber, transactionId, getTax(amount));
+      
+      if (response.success) {
         setPaymentStatus('success');
+        setPaymentHistory(prev => prev.map(p => 
+          p.id === paymentRecord.id ? { ...p, status: 'completed' } : p
+        ));
         setTimeout(() => {
           onPaymentComplete(transactionId);
         }, 2000);
       } else {
         setPaymentStatus('error');
+        setPaymentHistory(prev => prev.map(p => 
+          p.id === paymentRecord.id ? { ...p, status: 'failed' } : p
+        ));
       }
+    } catch (error) {
+      setPaymentStatus('error');
+      setPaymentHistory(prev => prev.map(p => 
+        p.id === paymentRecord.id ? { ...p, status: 'failed' } : p
+      ));
+    } finally {
       setIsProcessing(false);
-    }, 3000);
+    }
+  };
+
+  const simulatePaymentAPI = async (method: string, phone: string, transactionId: string, amount: number) => {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Simulate validation
+    if (transactionId.length < 6) {
+      return { success: false, error: 'Invalid transaction ID' };
+    }
+    
+    if (!phone.match(/^84|85|82|86|87/)) {
+      return { success: false, error: 'Invalid phone number' };
+    }
+    
+    // Simulate successful payment
+    return { success: true, transactionId };
   };
 
   const formatPhoneNumber = (value: string) => {
-    // Remove all non-digit characters
     const cleaned = value.replace(/\D/g, '');
-    
-    // Format as 84XXX-XXX or 85XXX-XXX etc.
     if (cleaned.length <= 3) return cleaned;
     if (cleaned.length <= 6) return cleaned.slice(0, 3) + '-' + cleaned.slice(3);
     return cleaned.slice(0, 3) + '-' + cleaned.slice(3, 6) + '-' + cleaned.slice(6, 9);
   };
 
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Timer countdown
+  React.useEffect(() => {
+    if (paymentStatus === 'processing' && timer > 0) {
+      const interval = setInterval(() => {
+        setTimer(prev => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setPaymentStatus('error');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [paymentStatus, timer]);
+
   return (
     <div className="bg-white p-8 rounded-xl shadow-xl border-t-8 border-[#005a32]">
-      <div className="flex items-center gap-3 mb-6">
-        <CreditCard className="text-[#005a32] w-8 h-8" />
-        <h2 className="text-2xl font-bold">Fase Final: Activação do Desembolso</h2>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <CreditCard className="text-[#005a32] w-8 h-8" />
+          <h2 className="text-2xl font-bold">Fase Final: Activação do Desembolso</h2>
+        </div>
+        <button 
+          onClick={() => setShowHistory(!showHistory)}
+          className="text-sm text-[#005a32] hover:text-[#004a29] flex items-center gap-1"
+        >
+          <Clock className="w-4 h-4" />
+          {showHistory ? 'Ocultar Histórico' : 'Ver Histórico'}
+        </button>
       </div>
       
       <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-600 mb-6 flex gap-3">
@@ -83,6 +167,40 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
         </div>
         <p className="text-[10px] text-slate-400 italic mt-1">* A taxa paga será reembolsada integralmente junto com o primeiro desembolso conforme o regulamento do fundo.</p>
       </div>
+
+      {/* Payment History */}
+      {showHistory && paymentHistory.length > 0 && (
+        <div className="mb-8 p-4 bg-slate-50 rounded-lg border border-slate-200">
+          <h3 className="font-bold mb-4 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-[#005a32]" />
+            Histórico de Pagamentos
+          </h3>
+          <div className="space-y-3">
+            {paymentHistory.map((payment) => (
+              <div key={payment.id} className="flex items-center justify-between p-3 bg-white rounded border">
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${
+                    payment.status === 'completed' ? 'bg-green-500' : 
+                    payment.status === 'failed' ? 'bg-red-500' : 'bg-yellow-500'
+                  }`} />
+                  <div>
+                    <p className="font-semibold text-sm">{payment.method.toUpperCase()}</p>
+                    <p className="text-xs text-slate-500">
+                      {new Date(payment.date).toLocaleString('pt-PT')}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">{payment.amount.toLocaleString()} MT</p>
+                  <p className="text-xs text-slate-500">
+                    {payment.transactionId || 'Sem código'}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Payment Method Selection */}
       <div className="mb-8">
@@ -178,6 +296,15 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
           >
             {isProcessing ? 'Processando...' : 'Confirmar Pagamento e Receber Valor'}
           </button>
+
+          {/* Timer */}
+          {paymentStatus === 'processing' && (
+            <div className="mt-4 text-center">
+              <p className="text-sm text-yellow-400">
+                Tempo restante: <span className="font-bold">{formatTime(timer)}</span>
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -192,7 +319,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
       {paymentStatus === 'success' && (
         <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
           <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-            <ShieldCheck className="w-6 h-6 text-green-600" />
+            <CheckCircle className="w-6 h-6 text-green-600" />
           </div>
           <p className="text-green-800 font-bold">Pagamento Confirmado!</p>
           <p className="text-sm text-green-600 mt-1">Aguarde o processamento do desembolso...</p>
