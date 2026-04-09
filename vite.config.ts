@@ -10,10 +10,43 @@ const __dirname = path.dirname(__filename);
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), viteSingleFile()],
+  plugins: [
+    react({
+      // Adicionado para melhor compatibilidade com Vercel
+      include: ["src/**/*.tsx", "src/**/*.ts"],
+      exclude: ["node_modules"]
+    }),
+    tailwindcss(),
+    viteSingleFile()
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
     },
+  },
+  build: {
+    // Configurações para build mais robusto
+    outDir: "dist",
+    assetsDir: "assets",
+    sourcemap: false,
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          ui: ["framer-motion", "lucide-react"],
+        },
+      },
+    },
+  },
+  server: {
+    port: 3000,
+    host: true,
   },
 });
