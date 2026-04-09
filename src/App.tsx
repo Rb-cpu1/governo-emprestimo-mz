@@ -4,7 +4,6 @@ import {
   Info, 
   ShieldCheck, 
   User, 
-  CreditCard, 
   Loader2,
   AlertTriangle,
   ArrowRight,
@@ -12,6 +11,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import VideoPlayer from './components/VideoPlayer';
+import PaymentMethod from './components/PaymentMethod';
 
 // --- Tipos ---
 type Step = 'news' | 'form' | 'analysis' | 'result' | 'payment';
@@ -42,6 +42,12 @@ const App = () => {
 
   const handleCandidatureClick = () => {
     nextStep('form');
+  };
+
+  const handlePaymentComplete = (transactionId: string) => {
+    // Payment completed successfully
+    console.log('Payment completed with transaction ID:', transactionId);
+    // Here you would typically redirect to a success page or show a completion message
   };
 
   return (
@@ -245,70 +251,10 @@ const App = () => {
           )}
 
           {step === 'payment' && (
-            <motion.div 
-              key="payment"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white p-8 rounded-xl shadow-xl border-t-8 border-[#005a32]"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <CreditCard className="text-[#005a32] w-8 h-8" />
-                <h2 className="text-2xl font-bold">Fase Final: Activação do Desembolso</h2>
-              </div>
-              
-              <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-600 mb-6 flex gap-3">
-                <Info className="text-blue-600 shrink-0" />
-                <p className="text-sm text-blue-800">
-                  O valor de <strong>{amount.toLocaleString()} MT</strong> já se encontra processado no Sistema de Administração Financeira do Estado (SISTAFE). Para o envio imediato, é necessária a liquidação da Taxa de Selo e Aprovação.
-                </p>
-              </div>
-
-              <div className="space-y-4 mb-8">
-                <div className="flex justify-between items-center py-2 border-b">
-                  <span className="text-slate-600">Valor do Empréstimo:</span>
-                  <span className="font-bold">{amount.toLocaleString()} MT</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b">
-                  <span className="text-slate-600 italic">Taxa de Aprovação Governamental:</span>
-                  <span className="font-bold text-red-600 underline">{getTax(amount)} MT</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b bg-slate-50 px-2 rounded">
-                  <span className="font-bold">Total a Receber na Conta:</span>
-                  <span className="font-bold text-green-700">{(amount + getTax(amount)).toLocaleString()} MT*</span>
-                </div>
-                <p className="text-[10px] text-slate-400 italic mt-1">* A taxa paga será reembolsada integralmente junto com o primeiro desembolso conforme o regulamento do fundo.</p>
-              </div>
-
-              <div className="bg-slate-900 text-white p-6 rounded-xl">
-                <h3 className="font-bold mb-4 flex items-center gap-2">
-                  <ShieldCheck className="text-green-400" /> Instruções de Pagamento (M-Pesa / e-Mola)
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <p>1. Aceda ao menu do seu provedor</p>
-                  <p>2. Escolha "Transferir Dinheiro"</p>
-                  <p>3. Digite o número do Agente de Arrecadação: <span className="bg-yellow-400 text-black px-2 py-0.5 rounded font-mono font-bold tracking-widest text-lg">84 123 4567</span></p>
-                  <p>4. Valor: <span className="text-yellow-400 font-bold text-lg">{getTax(amount)} MT</span></p>
-                  <p>5. Após o pagamento, insira o código de transação abaixo:</p>
-                </div>
-                <div className="mt-6">
-                  <input 
-                    type="text" 
-                    placeholder="Ex: PKJ765S..." 
-                    className="w-full bg-slate-800 border border-slate-700 p-3 rounded text-center font-mono uppercase tracking-widest"
-                  />
-                  <button className="w-full mt-4 bg-yellow-500 hover:bg-yellow-600 text-black font-black py-3 rounded transition-colors uppercase">
-                    Confirmar Pagamento e Receber Valor
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-6 flex items-start gap-3 bg-amber-50 p-4 rounded border border-amber-200">
-                <AlertTriangle className="text-amber-600 shrink-0" />
-                <p className="text-xs text-amber-800">
-                  Atenção: O sistema aguarda o pagamento por apenas 15 minutos. Caso não seja detectado, o seu perfil será bloqueado para novas solicitações este ano.
-                </p>
-              </div>
-            </motion.div>
+            <PaymentMethod 
+              amount={amount}
+              onPaymentComplete={handlePaymentComplete}
+            />
           )}
         </AnimatePresence>
       </main>
