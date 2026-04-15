@@ -52,7 +52,7 @@ const App = () => {
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1 overflow-hidden">
-               <img src="/logo-governo-oficial.svg" alt="Brasão Moçambique" className="object-contain" />
+               <img src="/logo-governo-oficial" alt="Brasão Moçambique" className="object-contain" />
             </div>
             <div>
               <h1 className="font-bold text-sm md:text-lg leading-tight">REPÚBLICA DE MOÇAMBIQUE</h1>
