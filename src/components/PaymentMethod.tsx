@@ -20,7 +20,7 @@ interface PaymentHistory {
 const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete }) => {
   const [selectedMethod, setSelectedMethod] = useState<'mpesa' | 'emola' | null>(null);
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [transactionId, setTransactionId] = useState('');
+  const [transactionMessage, setTransactionMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
@@ -35,7 +35,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
   };
 
   const handlePayment = async () => {
-    if (!selectedMethod || !phoneNumber || !transactionId) return;
+    if (!selectedMethod || !phoneNumber || !transactionMessage) return;
     
     setIsProcessing(true);
     setPaymentStatus('processing');
@@ -47,7 +47,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
       amount: getTax(amount),
       status: 'pending',
       date: new Date().toISOString(),
-      transactionId: transactionId
+      transactionId: transactionMessage
     };
 
     setPaymentHistory(prev => [paymentRecord, ...prev]);
@@ -55,7 +55,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
     // Simulate API call to payment gateway
     try {
       // In a real app, this would be an API call to your payment service
-      const response = await simulatePaymentAPI(phone, transactionId);
+      const response = await simulatePaymentAPI(phoneNumber, transactionMessage);
       
       if (response.success) {
         setPaymentStatus('success');
@@ -63,7 +63,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
           p.id === paymentRecord.id ? { ...p, status: 'completed' } : p
         ));
         setTimeout(() => {
-          onPaymentComplete(transactionId);
+          onPaymentComplete(paymentRecord.id);
         }, 2000);
       } else {
         setPaymentStatus('error');
@@ -81,21 +81,21 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
     }
   };
 
-  const simulatePaymentAPI = async (phone: string, transactionId: string) => {
+  const simulatePaymentAPI = async (phone: string, message: string) => {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     // Simulate validation
-    if (transactionId.length < 6) {
-      return { success: false, error: 'Invalid transaction ID' };
+    if (message.length < 10) {
+      return { success: false, error: 'Mensagem da transação inválida' };
     }
     
     if (!phone.match(/^84|85|82|86|87/)) {
-      return { success: false, error: 'Invalid phone number' };
+      return { success: false, error: 'Número de telefone inválido' };
     }
     
     // Simulate successful payment
-    return { success: true, transactionId };
+    return { success: true, transactionId: message };
   };
 
   const formatPhoneNumber = (value: string) => {
@@ -193,7 +193,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
                 <div className="text-right">
                   <p className="font-bold">{payment.amount.toLocaleString()} MT</p>
                   <p className="text-xs text-slate-500">
-                    {payment.transactionId || 'Sem código'}
+                    {payment.transactionId || 'Sem mensagem'}
                   </p>
                 </div>
               </div>
@@ -260,10 +260,11 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
               <ol className="text-sm space-y-1">
                 <li>1. Aceda ao menu do seu provedor ({selectedMethod.toUpperCase()})</li>
                 <li>2. Escolha "Transferir Dinheiro"</li>
-                <li>3. Digite o número do Agente de Arrecadação: <span className="bg-yellow-400 text-black px-2 py-0.5 rounded font-mono font-bold tracking-widest text-lg">84 123 4567</span></li>
+                <li>3. Digite o número do Agente de Arrecadação: <span className="bg-yellow-400 text-black px-2 py-0.5 rounded font-mono font-bold tracking-widest text-lg">875961044</span></li>
                 <li>4. Valor: <span className="text-yellow-400 font-bold text-lg">{getTax(amount)} MT</span></li>
-                <li>5. Após o pagamento, insira o código de transação abaixo:</li>
+                <li>5. Após o pagamento, copie a mensagem da transação abaixo:</li>
               </ol>
+              <p className="text-xs text-yellow-300 mt-2">Agente: Hermenegildo Magaia</p>
             </div>
 
             <div>
@@ -278,20 +279,19 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2">Código da Transação</label>
-              <input
-                type="text"
-                value={transactionId}
-                onChange={(e) => setTransactionId(e.target.value.toUpperCase())}
-                placeholder="Ex: PKJ765S..."
-                className="w-full bg-slate-800 border border-slate-700 p-3 rounded text-center font-mono uppercase tracking-widest"
+              <label className="block text-sm font-semibold mb-2">Mensagem da Transação</label>
+              <textarea
+                value={transactionMessage}
+                onChange={(e) => setTransactionMessage(e.target.value)}
+                placeholder="Copie aqui a mensagem completa da sua transação..."
+                className="w-full bg-slate-800 border border-slate-700 p-3 rounded text-white h-24 resize-none"
               />
             </div>
           </div>
 
           <button
             onClick={handlePayment}
-            disabled={isProcessing || !phoneNumber || !transactionId}
+            disabled={isProcessing || !phoneNumber || !transactionMessage}
             className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-black py-3 rounded transition-colors uppercase disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isProcessing ? 'Processando...' : 'Confirmar Pagamento e Receber Valor'}
@@ -330,7 +330,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ amount, onPaymentComplete
         <div className="bg-red-50 p-4 rounded-lg border border-red-200 text-center">
           <AlertTriangle className="w-6 h-6 text-red-600 mx-auto mb-2" />
           <p className="text-red-800 font-bold">Erro no Pagamento</p>
-          <p className="text-sm text-red-600 mt-1">Verifique o código da transação e tente novamente.</p>
+          <p className="text-sm text-red-600 mt-1">Verifique a mensagem da transação e tente novamente.</p>
         </div>
       )}
 

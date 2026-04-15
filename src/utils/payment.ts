@@ -1,7 +1,7 @@
 export interface PaymentRequest {
   method: 'mpesa' | 'emola';
   phoneNumber: string;
-  transactionId: string;
+  transactionMessage: string;
   amount: number;
 }
 
@@ -24,10 +24,10 @@ export const validatePayment = (request: PaymentRequest): { isValid: boolean; er
     errors.push('Número de telefone inválido');
   }
 
-  if (!request.transactionId) {
-    errors.push('Código da transação é obrigatório');
-  } else if (request.transactionId.length < 6) {
-    errors.push('Código da transação deve ter pelo menos 6 caracteres');
+  if (!request.transactionMessage) {
+    errors.push('Mensagem da transação é obrigatória');
+  } else if (request.transactionMessage.length < 10) {
+    errors.push('Mensagem da transação deve ter pelo menos 10 caracteres');
   }
 
   if (!request.amount || request.amount <= 0) {
@@ -47,6 +47,6 @@ export const formatPhoneNumber = (value: string): string => {
   return cleaned.slice(0, 3) + '-' + cleaned.slice(3, 6) + '-' + cleaned.slice(6, 9);
 };
 
-export const formatTransactionId = (value: string): string => {
-  return value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+export const formatTransactionMessage = (value: string): string => {
+  return value.trim().toUpperCase();
 };
