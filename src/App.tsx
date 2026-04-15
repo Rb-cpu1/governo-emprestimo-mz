@@ -9,6 +9,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import VideoPlayer from './components/VideoPlayer';
 import PaymentMethod from './components/PaymentMethod';
 import PaymentSuccess from './components/PaymentSuccess';
+import { generateMetaTags } from './utils/seo';
+
+// Add meta tags to head
+useEffect(() => {
+  const metaTags = generateMetaTags();
+  const head = document.head;
+  const existingMeta = head.querySelector('meta[name="description"]');
+  
+  if (existingMeta) {
+    existingMeta.setAttribute('content', metaTags.match(/<meta name="description" content="([^"]+)"/)?.[1] || '');
+  } else {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = metaTags;
+    const metaElements = tempDiv.querySelectorAll('meta');
+    metaElements.forEach(meta => head.appendChild(meta));
+  }
+}, []);
 
 // --- Tipos ---
 type Step = 'news' | 'form' | 'analysis' | 'result' | 'payment' | 'success';
