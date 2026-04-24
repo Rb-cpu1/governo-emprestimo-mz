@@ -11,7 +11,6 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
   plugins: [
     react({
-      // Adicionado para melhor compatibilidade com Vercel
       include: ["src/**/*.tsx", "src/**/*.ts"],
       exclude: ["node_modules"]
     }),
@@ -23,25 +22,10 @@ export default defineConfig({
     },
   },
   build: {
-    // Configurações para build mais robusto
     outDir: "dist",
     assetsDir: "assets",
-    sourcemap: false,
-    minify: "terser",
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ["react", "react-dom"],
-          ui: ["framer-motion", "lucide-react"],
-        },
-      },
-    },
+    sourcemap: false
+    // TERSER REMOVIDO! O Vite vai usar o minificador padrão (esbuild) que é mais rápido e não dá erro.
   },
   server: {
     port: 3000,
