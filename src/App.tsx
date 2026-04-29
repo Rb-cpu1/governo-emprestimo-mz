@@ -44,8 +44,17 @@ const App = () => {
   const [showCandidatureButton, setShowCandidatureButton] = useState(false);
   const [paymentTransactionId, setPaymentTransactionId] = useState('');
 
+  // Verificar se estamos no lado do cliente
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // Salvar dados no localStorage quando o formulário for enviado
   const saveUserData = (data: UserData) => {
+    if (typeof window === 'undefined') return;
+    
     const existingData = JSON.parse(localStorage.getItem('candidates') || '[]');
     const newCandidate = {
       ...data,
@@ -97,6 +106,8 @@ const App = () => {
 
   // Add meta tags to head
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const metaTags = generateMetaTags();
     const head = document.head;
     const existingMeta = head.querySelector('meta[name="description"]');
@@ -110,6 +121,18 @@ const App = () => {
       metaElements.forEach(meta => head.appendChild(meta));
     }
   }, []);
+
+  // Renderizar apenas no lado do cliente
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-2 border-[#005a32] border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-slate-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (currentPage === 'admin') {
     return <AdminDashboard onBack={goToMain} />;
@@ -224,7 +247,8 @@ const App = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold mb-2">Nome Completo</label>
-                  <input                     type="text" 
+                  <input 
+                    type="text" 
                     className="w-full border p-3 rounded-md bg-slate-50 focus:ring-2 focus:ring-[#005a32] outline-none"
                     placeholder="Como no BI"
                     value={userData.name}
@@ -234,7 +258,8 @@ const App = () => {
                 <div>
                   <label className="block text-sm font-semibold mb-2">NUIT</label>
                   <input 
-                    type="number"                     className="w-full border p-3 rounded-md bg-slate-50 focus:ring-2 focus:ring-[#005a32] outline-none"
+                    type="number" 
+                    className="w-full border p-3 rounded-md bg-slate-50 focus:ring-2 focus:ring-[#005a32] outline-none"
                     placeholder="9 dígitos"
                     value={userData.nuit}
                     onChange={(e) => setUserData({...userData, nuit: e.target.value})}
@@ -252,7 +277,8 @@ const App = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold mb-2">Província</label>
-                  <select                     className="w-full border p-3 rounded-md bg-slate-50 focus:ring-2 focus:ring-[#005a32] outline-none"
+                  <select 
+                    className="w-full border p-3 rounded-md bg-slate-50 focus:ring-2 focus:ring-[#005a32] outline-none"
                     value={userData.province}
                     onChange={(e) => setUserData({...userData, province: e.target.value})}
                   >
@@ -311,7 +337,8 @@ const App = () => {
                   type="range" 
                   min="10000" 
                   max="1000000" 
-                  step="10000"                   className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#005a32]"
+                  step="10000" 
+                  className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#005a32]"
                   value={amount}
                   onChange={(e) => setAmount(Number(e.target.value))}
                 />
@@ -379,6 +406,49 @@ const App = () => {
   );
 };
 
-// ... rest of the component remains the same ...
+// Componente de análise (placeholder)
+const AnalysisComponent = ({ onComplete }: { onComplete: () => void }) => {
+  const [isAnalyzing, setIsAnalyzing] = useState(true);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (!isAnalyzing) return;
+
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsAnalyzing(false);
+          setTimeout(onComplete, 500);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 300);
+
+    return () => clearInterval(interval);
+  }, [isAnalyzing, onComplete]);
+
+  return (
+    <div className="bg-white p-8 rounded-xl shadow-xl text-center">
+      <div className="flex justify-center mb-6">
+        <div className="bg-blue-100 p-4 rounded-full">
+          <Loader2 className="w-16 h-16 text-blue-600 animate-spin" />
+        </div>
+      </div>
+      <h2 className="text-2xl font-bold text-slate-800 mb-4">Análise do Perfil</h2>
+      <p className="text-slate-600 mb-6">Estamos a analisar o seu perfil socioeconómico...</p>
+      
+      <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
+        <div 
+          className="bg-[#005a32] h-4 rounded-full transition-all duration-300"
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
+      
+      <p className="text-sm text-slate-500">{progress}% concluído</p>
+    </div>
+  );
+};
 
 export default App;
