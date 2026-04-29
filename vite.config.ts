@@ -3,19 +3,14 @@ import { fileURLToPath } from "url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import { viteSingleFile } from "vite-plugin-singlefile";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [
-    react({
-      include: ["src/**/*.tsx", "src/**/*.ts"],
-      exclude: ["node_modules"]
-    }),
-    tailwindcss(),
-    viteSingleFile()
+    react(),
+    tailwindcss()
   ],
   resolve: {
     alias: {
@@ -24,7 +19,6 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
-    assetsDir: "",
     sourcemap: false,
     minify: "terser",
     terserOptions: {
@@ -33,20 +27,8 @@ export default defineConfig({
         drop_debugger: true,
       },
     },
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ["react", "react-dom"],
-          ui: ["framer-motion", "lucide-react"],
-        },
-      },
-    },
   },
   base: process.env.NODE_ENV === 'production' ? '/portal-empreendedorismo/' : '/',
-  preview: {
-    port: 3000,
-    host: true,
-  },
   server: {
     port: 3000,
     host: true,
@@ -58,7 +40,4 @@ export default defineConfig({
     include: ['react', 'react-dom', 'framer-motion', 'lucide-react'],
   },
   publicDir: 'public',
-  clearScreen: false,
-  logLevel: 'info',
-  mode: 'production'
 });
