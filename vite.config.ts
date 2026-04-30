@@ -28,16 +28,18 @@ export default defineConfig({
       },
     },
   },
-  base: process.env.NODE_ENV === 'production' ? '/portal-empreendedorismo/' : '/',
+
+  // ✅ AQUI ESTÁ A CORREÇÃO
+  base: '/',
+
   server: {
     port: 3000,
     host: true,
   },
+
   define: {
     global: 'globalThis',
   },
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'framer-motion', 'lucide-react'],
-  },
+
   publicDir: 'public',
 });
