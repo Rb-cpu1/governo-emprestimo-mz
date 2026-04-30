@@ -12,24 +12,17 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
     },
   },
+
   build: {
     outDir: "dist",
-    sourcemap: false,
-    minify: "terser",
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
   },
 
-  // ✅ AQUI ESTÁ A CORREÇÃO
   base: '/',
 
   server: {
